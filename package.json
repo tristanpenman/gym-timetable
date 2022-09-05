@@ -1,7 +1,8 @@
 {
   "license": "UNLICENSED",
   "scripts": {
-    "lint": "eslint *.js"
+    "lint": "eslint *.js",
+    "start": "node index.local.js"
   },
   "dependencies": {
     "node-fetch": "^3.2.10"
