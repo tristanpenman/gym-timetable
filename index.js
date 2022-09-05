@@ -19,7 +19,7 @@ exports.handler = async (event) => {
     const e = new Date(d);
     e.setDate(e.getDate() + n);
     return e;
-  }
+  };
 
   const datestamp = (d) => {
     return `${d.getFullYear()}-${`0${d.getMonth() + 1}`.slice(-2)}-${`0${d.getDate()}`.slice(-2)}`;
@@ -61,13 +61,13 @@ exports.handler = async (event) => {
   });
   
   const dayNames = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday'
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday'
   ];
 
   const body = `<!DOCTYPE html>
@@ -166,7 +166,9 @@ exports.handler = async (event) => {
 
   const response = {
     body,
-    headers: {"content-type": "text/html"},
+    headers: {
+      'content-type': 'text/html'
+    },
     statusCode: 200
   };
 
