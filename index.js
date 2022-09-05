@@ -1,70 +1,72 @@
-import('node-fetch').then(({default: fetch}) => {
-  const monday = () => {
+const fetch = require('node-fetch');
+
+exports.handler = async (_event) => {
+  const monday = (() => {
     const d = new Date();
     const day = d.getDay();
     const diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
     return new Date(d.setDate(diff));
-  };
+  })();
 
   const plusNDays = (d, n) => {
-    d.setDate(d.getDate() + n);
-    return d;
+    const e = new Date(d);
+    e.setDate(e.getDate() + n);
+    return e;
   }
 
-  const dateStamp = (d) => {
+  const datestamp = (d) => {
     return `${d.getFullYear()}-${`0${d.getMonth() + 1}`.slice(-2)}-${`0${d.getDate()}`.slice(-2)}`;
   };
 
   const timestamp = (d, t) => {
-    const ts = `${dateStamp(d)}T${t}`;
+    const ts = `${datestamp(d)}T${t}`;
     return ts;
   };
 
-  const load = async (clubIds) => {
-    const options = {
-      mode: 'no-cors'
-    };
+  const options = {
+    mode: 'no-cors'
+  };
+  
+  const clubIds = [
+    '45b4263e-7633-4578-9934-1f765c1723ad'
+  ];
+  
+  const params = {
+    FromDate: timestamp(monday, '00:00:00'),
+    ToDate: timestamp(plusNDays(monday, 6), '23:59:59'),
+    ClubIds: clubIds.join(',')
+  };
+  
+  const url = `https://api.fitnessfirst.com.au/classes/v1/api/sessions?${new URLSearchParams(params).toString()}`;
+  const result = await fetch(url, options);
+  const data = await result.json();
+  const sessions = data.sessions;
+  const sorted = sessions.sort((a, b) => new Date(a.startDate) < new Date(b.startDate));
+  
+  const bucketed = [];
+  sorted.forEach((session) => {
+    const d = datestamp(new Date(session.startDate));
+    if (bucketed.length === 0 || bucketed[bucketed.length - 1].date !== d) {
+      bucketed.push({
+        date: d,
+        sessions: []
+      });
+    }
 
-    const m = monday();
-
-    const params = {
-      FromDate: timestamp(m, '00:00:00'),
-      ToDate: timestamp(plusNDays(m, 6), '23:59:59'),
-      ClubIds: clubIds.join(',')
-    };
-
-    console.error(params);
-    
-    const result = await fetch(`https://api.fitnessfirst.com.au/classes/v1/api/sessions?${new URLSearchParams(params).toString()}`, options);
-
-    const data = await result.json();
-    const sessions = data.sessions;
-    const sorted = sessions.sort((a, b) => new Date(a.startDate) < new Date(b.startDate));
-
-    const bucketed = [];
-    sorted.forEach((session) => {
-        const d = dateStamp(new Date(session.startDate));
-        if (bucketed.length === 0 || bucketed[bucketed.length - 1].date !== d) {
-            bucketed.push({
-                date: d,
-                sessions: []
-            });
-        }
-
-        bucketed[bucketed.length - 1].sessions.push(session);
-    });
-
-    const dayNames = [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday'
-    ];
-
-    const output = `
+    bucketed[bucketed.length - 1].sessions.push(session);
+  });
+  
+  const dayNames = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+  ];
+  
+  const body = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -139,12 +141,11 @@ import('node-fetch').then(({default: fetch}) => {
 </html>
 `;
 
-    console.log(output);
+  // TODO implement
+  const response = {
+      statusCode: 200,
+      body
   };
 
-  const clubIds = [
-    '45b4263e-7633-4578-9934-1f765c1723ad'
-  ];
-
-  load(clubIds);
-});
+  return response;
+};
