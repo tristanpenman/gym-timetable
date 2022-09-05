@@ -49,10 +49,10 @@ exports.handler = async (event) => {
   
   const bucketed = [];
   sorted.forEach((session) => {
-    const d = datestamp(new Date(session.startDate));
-    if (bucketed.length === 0 || bucketed[bucketed.length - 1].date !== d) {
+    const date = datestamp(new Date(session.startDate));
+    if (bucketed.length === 0 || bucketed[bucketed.length - 1].date !== date) {
       bucketed.push({
-        date: d,
+        date,
         sessions: []
       });
     }
@@ -78,41 +78,41 @@ exports.handler = async (event) => {
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Group Fitness Timetable</title>
   <style>
-  @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700');
+    @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700');
 
-  *, *:before, *:after {
-    box-sizing: border-box;
-  }
-  
-  body {
-    padding:24px;
-    font-family: 'Source Sans Pro', sans-serif;
-    margin: 0;
-    text-align: left;
-  }
-  
-  td {
-    padding-right: 15px;
-  }
+    *, *:before, *:after {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Source Sans Pro', sans-serif;
+      margin: 0;
+      padding: 24px;
+      text-align: left;
+    }
+    
+    td {
+      padding-right: 15px;
+    }
 
-  h1,h2,h3,h4,h5,h6 {
-    margin: 0;
-  }
-  
-  a {
-    color: black;
-    padding: 10px;
-    border: 1px solid #ccc;
-    margin: 5px 5px 5px 0;
-    display: inline-flex;
-    border-radius: 5px;
-    background: #f5f5f5;
-    text-decoration: none;
-  }
-  
-  a:hover {
-    background: #f9f9f9;
-  }
+    h1,h2,h3,h4,h5,h6 {
+      margin: 0;
+    }
+    
+    a {
+      background: #f5f5f5;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      color: black;
+      display: inline-flex;
+      margin: 5px 5px 5px 0;
+      padding: 10px;
+      text-decoration: none;
+    }
+    
+    a:hover {
+      background: #f9f9f9;
+    }
   </style>
 </head>
 <body>
@@ -165,9 +165,9 @@ exports.handler = async (event) => {
 `;
 
   const response = {
+    body,
     headers: {"content-type": "text/html"},
-    statusCode: 200,
-    body
+    statusCode: 200
   };
 
   return response;
