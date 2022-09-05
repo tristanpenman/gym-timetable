@@ -103,7 +103,7 @@ exports.handler = async (event) => {
     color: black;
     padding: 10px;
     border: 1px solid #ccc;
-    margin: 0 5px 0 0;
+    margin: 5px 5px 5px 0;
     display: inline-flex;
     border-radius: 5px;
     background: #f5f5f5;
