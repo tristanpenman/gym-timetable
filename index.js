@@ -1,6 +1,13 @@
-const fetch = require('node-fetch');
+exports.handler = async (event) => {
+  const flindersStId = 'e3260b8a-b5e7-4042-bc2a-8a2fa171d27d';
+  const melbCentralId = '45b4263e-7633-4578-9934-1f765c1723ad';
+  const richmondId = 'a0412fa0-0591-4e5c-b7a4-0b1626ad96fd';
+  const vicGardensId = 'ea71b228-edac-4968-93f0-f7e43d41f1bd';
 
-exports.handler = async (_event) => {
+  const clubId = event.queryStringParameters?.club_id || melbCentralId;
+
+  const { default: fetch } = await import('node-fetch');
+
   const monday = (() => {
     const d = new Date();
     const day = d.getDay();
@@ -27,14 +34,10 @@ exports.handler = async (_event) => {
     mode: 'no-cors'
   };
   
-  const clubIds = [
-    '45b4263e-7633-4578-9934-1f765c1723ad'
-  ];
-  
   const params = {
     FromDate: timestamp(monday, '00:00:00'),
     ToDate: timestamp(plusNDays(monday, 6), '23:59:59'),
-    ClubIds: clubIds.join(',')
+    ClubIds: [clubId]
   };
   
   const url = `https://api.fitnessfirst.com.au/classes/v1/api/sessions?${new URLSearchParams(params).toString()}`;
@@ -42,6 +45,7 @@ exports.handler = async (_event) => {
   const data = await result.json();
   const sessions = data.sessions;
   const sorted = sessions.sort((a, b) => new Date(a.startDate) < new Date(b.startDate));
+  const clubName = sessions.find((session) => session.clubId === clubId)?.clubName || 'Unknown';
   
   const bucketed = [];
   sorted.forEach((session) => {
@@ -65,86 +69,105 @@ exports.handler = async (_event) => {
       'Friday',
       'Saturday'
   ];
-  
-  const body = `
-<!DOCTYPE html>
+
+  const body = `<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Group Fitness Timetable</title>
-    <style>
-    @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Group Fitness Timetable</title>
+  <style>
+  @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700');
 
-    *, *:before, *:after {
-        box-sizing:border-box;
-    }
-    
-    body {
-        padding:24px;
-        font-family:'Source Sans Pro', sans-serif;
-        margin:0;
-        text-align:left;
-    }
-    
-    td {
-        padding-right: 15px;
-    }
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
+  
+  body {
+    padding:24px;
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 0;
+    text-align: left;
+  }
+  
+  td {
+    padding-right: 15px;
+  }
 
-    h1,h2,h3,h4,h5,h6 {
-        margin:0;
-    }
-    </style>
+  h1,h2,h3,h4,h5,h6 {
+    margin: 0;
+  }
+  
+  a {
+    color: black;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin: 0 5px 0 0;
+    display: inline-flex;
+    border-radius: 5px;
+    background: #f5f5f5;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    background: #f9f9f9;
+  }
+  </style>
 </head>
 <body>
-    <h1>Group Fitness Timetable</h1>
-    <h2>Melbourne Central</h2>
-    <hr>
-    <table>
-    <tbody>
-        ${bucketed.map((bucket) => `
-        <tr>
-            <th colspan="3">${bucket.date} - ${dayNames[new Date(bucket.date).getDay()]}</th>
-        </tr>
-        <tr>
-            <th>
-                Time
-            </th>
-            <th>
-                Class
-            </th>
-            <th>
-                Instructor
-            </th>
-        </tr>
-        ${bucket.sessions.map((session) => `
-        <tr>
-            <td>
-                ${`0${new Date(session.startDate).getHours()}`.slice(-2)}:${`0${new Date(session.startDate).getMinutes()}`.slice(-2)}
-            </td>
-            <td>
-                ${session.className}
-            </td>
-            <td>
-                ${session.instructorName}
-            </td>
-        </tr>
-        `).join('')}
-        <tr>
-            <th colspan="3">&nbsp;</th>
-        </tr>
+  <h1>Group Fitness Timetable</h1>
+  <h2>${clubName}</h2>
+  <hr>
+  <a href="?club_id=${flindersStId}">Flinders Street</a>
+  <a href="?club_id=${melbCentralId}">Melbourne Central</a>
+  <a href="?club_id=${richmondId}">Richmond</a>
+  <a href="?club_id=${vicGardensId}">Vic Gardens</a>
+  <hr>
+  <table>
+  <tbody>
+    ${bucketed.map((bucket) => `
+    <tr>
+      <th colspan="3">${bucket.date} - ${dayNames[new Date(bucket.date).getDay()]}</th>
+    </tr>
+    <tr>
+      <th>
+        Time
+      </th>
+      <th>
+        Class
+      </th>
+      <th>
+        Instructor
+      </th>
+    </tr>
+    ${bucket.sessions.map((session) => `
+    <tr>
+      <td>
+        ${`0${new Date(session.startDate).getHours()}`.slice(-2)}:${`0${new Date(session.startDate).getMinutes()}`.slice(-2)}
+      </td>
+      <td>
+        ${session.className}
+      </td>
+      <td>
+        ${session.instructorName}
+      </td>
+    </tr>
     `).join('')}
-    </tbody>
-    </table>
+    <tr>
+      <th colspan="3">&nbsp;</th>
+    </tr>
+  `).join('')}
+  </tbody>
+  </table>
 </body>
 </html>
 `;
 
-  // TODO implement
   const response = {
-      statusCode: 200,
-      body
+    headers: {"content-type": "text/html"},
+    statusCode: 200,
+    body
   };
 
   return response;
