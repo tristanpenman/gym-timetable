@@ -1,6 +1,7 @@
 exports.handler = async (event) => {
   const flindersStId = 'e3260b8a-b5e7-4042-bc2a-8a2fa171d27d';
   const melbCentralId = '45b4263e-7633-4578-9934-1f765c1723ad';
+  const qvId = 'c26461ee-653d-4c70-9791-ad4f1ba2820b';
   const richmondId = 'a0412fa0-0591-4e5c-b7a4-0b1626ad96fd';
   const vicGardensId = 'ea71b228-edac-4968-93f0-f7e43d41f1bd';
 
@@ -8,12 +9,7 @@ exports.handler = async (event) => {
 
   const { default: fetch } = await import('node-fetch');
 
-  const monday = (() => {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
-    return new Date(d.setDate(diff));
-  })();
+  const today = new Date();
 
   const plusNDays = (d, n) => {
     const e = new Date(d);
@@ -35,8 +31,8 @@ exports.handler = async (event) => {
   };
   
   const params = {
-    FromDate: timestamp(monday, '00:00:00'),
-    ToDate: timestamp(plusNDays(monday, 6), '23:59:59'),
+    FromDate: timestamp(today, '00:00:00'),
+    ToDate: timestamp(plusNDays(today, 6), '23:59:59'),
     ClubIds: [clubId]
   };
   
@@ -121,6 +117,7 @@ exports.handler = async (event) => {
   <hr>
   <a href="?club_id=${flindersStId}">Flinders Street</a>
   <a href="?club_id=${melbCentralId}">Melbourne Central</a>
+  <a href="?club_id=${qvId}">QV Platinum</a>
   <a href="?club_id=${richmondId}">Richmond</a>
   <a href="?club_id=${vicGardensId}">Vic Gardens</a>
   <hr>
