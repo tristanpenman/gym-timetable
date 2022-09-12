@@ -9,7 +9,16 @@ exports.handler = async (event) => {
 
   const { default: fetch } = await import('node-fetch');
 
-  const today = new Date();
+  // There are probably better ways to do this using moment.js
+  // but this is good enough for ensuring that the day/month that we
+  // supply to the Fitness First API is in the correct timezone for
+  // the current day (i.e Melbourne/Sydney)
+  const now = new Date();
+  const timeZone = 'Australia/Melbourne';
+  const day = now.toLocaleString('en-US', { timeZone, day: 'numeric' });
+  const monthIndex = now.toLocaleString('en-US', { timeZone, month: 'numeric' }) - 1;
+  const year = now.toLocaleString('en-US', { timeZone, year: 'numeric' });
+  const today = new Date(year, monthIndex, day);
 
   const plusNDays = (d, n) => {
     const e = new Date(d);
@@ -29,20 +38,20 @@ exports.handler = async (event) => {
   const options = {
     mode: 'no-cors'
   };
-  
+
   const params = {
     FromDate: timestamp(today, '00:00:00'),
     ToDate: timestamp(plusNDays(today, 6), '23:59:59'),
     ClubIds: [clubId]
   };
-  
+
   const url = `https://api.fitnessfirst.com.au/classes/v1/api/sessions?${new URLSearchParams(params).toString()}`;
   const result = await fetch(url, options);
   const data = await result.json();
   const sessions = data.sessions;
   const sorted = sessions.sort((a, b) => new Date(a.startDate) < new Date(b.startDate));
   const clubName = sessions.find((session) => session.clubId === clubId)?.clubName || 'Unknown';
-  
+
   const bucketed = [];
   sorted.forEach((session) => {
     const date = datestamp(new Date(session.startDate));
@@ -55,7 +64,7 @@ exports.handler = async (event) => {
 
     bucketed[bucketed.length - 1].sessions.push(session);
   });
-  
+
   const dayNames = [
     'Sunday',
     'Monday',
@@ -79,14 +88,14 @@ exports.handler = async (event) => {
     *, *:before, *:after {
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Source Sans Pro', sans-serif;
       margin: 0;
       padding: 24px;
       text-align: left;
     }
-    
+
     td {
       padding-right: 15px;
     }
@@ -94,7 +103,7 @@ exports.handler = async (event) => {
     h1,h2,h3,h4,h5,h6 {
       margin: 0;
     }
-    
+
     a {
       background: #f5f5f5;
       border-radius: 5px;
@@ -105,7 +114,7 @@ exports.handler = async (event) => {
       padding: 10px;
       text-decoration: none;
     }
-    
+
     a:hover {
       background: #f9f9f9;
     }
