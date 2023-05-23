@@ -1,4 +1,4 @@
-exports.handler = async (event) => {
+const process = async (event) => {
   const flindersStId = 'e3260b8a-b5e7-4042-bc2a-8a2fa171d27d';
   const melbCentralId = '45b4263e-7633-4578-9934-1f765c1723ad';
   const qvId = 'c26461ee-653d-4c70-9791-ad4f1ba2820b';
@@ -39,13 +39,19 @@ exports.handler = async (event) => {
   const tryFetch = async (url, options) => {
     for (let i = 0; i < 5; i++) {
       try {
-        return await fetch(url, options);
+        const result = await fetch(url, options);
+        if (result.ok) {
+          return result;
+        }
       } catch (error) {
-        // wait three seconds
-        await new Promise((resolve) => {
-          setTimeout(() => resolve, 3000);
-        });
+        // ignored
+        console.error('fetch failed', error);
       }
+
+      // wait three seconds
+      await new Promise((resolve) => {
+        setTimeout(() => resolve, 3000);
+      });
     }
   };
 
@@ -142,11 +148,11 @@ exports.handler = async (event) => {
     .heading {
       background-color: #000;
       color: #fff;
-      padding: 20px 24px;
+      padding: 20px;
     }
 
     .main {
-      padding: 24px;
+      padding: 24px 20px 20px 20px;
     }
   </style>
 </head>
@@ -157,8 +163,8 @@ exports.handler = async (event) => {
       style="height: 24px"
     >
     <h2>${clubName}</h2>
-    <a href="?club_id=${flindersStId}">Flinders Street</a>
-    <a href="?club_id=${melbCentralId}">Melbourne Central</a>
+    <a href="?club_id=${flindersStId}">Flinders St</a>
+    <a href="?club_id=${melbCentralId}">Melb Central</a>
     <a href="?club_id=${qvId}">QV Platinum</a>
     <a href="?club_id=${richmondId}">Richmond</a>
     <a href="?club_id=${vicGardensId}">Vic Gardens</a>
@@ -197,7 +203,7 @@ exports.handler = async (event) => {
           ${session.instructorName || '-'}
         </td>
         <td>
-          ${session.duration} mins
+          ${session.duration} m
         </td>
       </tr>
       `).join('')}
@@ -221,4 +227,13 @@ exports.handler = async (event) => {
   };
 
   return response;
+};
+
+exports.handler = async (event) => {
+  try {
+    return await process(event);
+  } catch (error) {
+    console.error('processing failed', error);
+    return error.toString();
+  }
 };
