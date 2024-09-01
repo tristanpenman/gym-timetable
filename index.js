@@ -1,8 +1,9 @@
 const process = async (event) => {
+  const brightonId = '6e80808e-1cd4-42fe-94a6-1838348f84d5';
   const flindersStId = 'e3260b8a-b5e7-4042-bc2a-8a2fa171d27d';
   const melbCentralId = '45b4263e-7633-4578-9934-1f765c1723ad';
   const qvId = 'c26461ee-653d-4c70-9791-ad4f1ba2820b';
-  const richmondId = 'a0412fa0-0591-4e5c-b7a4-0b1626ad96fd';
+  const richmondId = 'fade8b16-4ef7-4a96-a9fb-8cd7a89f50f3';
   const stKildaId = 'fae44247-2f5c-4fc4-80e3-982b6d88646b';
   const vicGardensId = 'ea71b228-edac-4968-93f0-f7e43d41f1bd';
 
@@ -169,6 +170,7 @@ const process = async (event) => {
     <a href="?club_id=${richmondId}">Richmond</a>
     <a href="?club_id=${vicGardensId}">Vic Gardens</a>
     <a href="?club_id=${stKildaId}">St Kilda</a>
+    <a href="?club_id=${brightonId}">Brighton</a>
   </div>
   <div class="main">
     <table>
